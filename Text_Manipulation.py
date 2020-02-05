@@ -12,6 +12,11 @@ def defib_shock_text_manipulation(path):
         if list_element[len(list_element) - 4: len(list_element)] == ".txt" and list_element.find("(Filtered)") == -1:
             user_list.append(list_element)
 
+    # Exit function if there are no .txt files in the folder
+    if len(user_list) == 0:
+        print("\nNo .txt files to manipulate.")
+        return
+
     # Show user the relevant files
     user_choice = 0
     while user_choice < 1 or user_choice > len(user_list):
@@ -82,4 +87,4 @@ def defib_shock_text_manipulation(path):
         except ValueError:
             continue
 
-    print("\nPlease check the source folder for your new file.")
+    print("\n.txt files manipulated successfully.")

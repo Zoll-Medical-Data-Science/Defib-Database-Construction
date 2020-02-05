@@ -15,6 +15,11 @@ def add_title_column(path):
         if (extension == ".xls" or extension == ".xlsx" or extension == ".xlsb" or extension == ".xlsm") and list_element.find("(Column_Added)") == -1:
             user_list.append(list_element)
 
+    # Exit function if there are no Excel files in the folder
+    if len(user_list) == 0:
+        print("\nNo Excel files to manipulate.")
+        return
+
     # Show user the relevant files
     user_choice = 0
     while user_choice < 1 or user_choice > len(user_list):
@@ -86,4 +91,4 @@ def add_title_column(path):
     new_Excel.save(path + "\\" + formatted_file_name[0 : len(formatted_file_name) - 5] + "_(Column_Added)" +
                    formatted_file_name[len(formatted_file_name) - 5: len(formatted_file_name)])
 
-    print("\nPlease check the source folder for your new file.")
+    print("\nExcel files manipulated successfully.")

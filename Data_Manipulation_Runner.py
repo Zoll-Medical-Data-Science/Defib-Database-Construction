@@ -22,7 +22,7 @@ while file_decision != 1 and file_decision != 2:
 if file_decision == 1:
     master_text_file = Text_Manipulation.defib_shock_data_consolidation(path)
     if master_text_file != "N/A":
-        master_csv_file = Text_Manipulation.createCSV(master_text_file)
+        master_csv_file = Text_Manipulation.create_CSV(master_text_file)
         Text_Manipulation.createExcel(master_csv_file)
 else:
     Excel_File_Manipulation.add_title_column(path)

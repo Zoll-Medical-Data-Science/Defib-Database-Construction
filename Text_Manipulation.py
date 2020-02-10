@@ -109,7 +109,8 @@ def defib_shock_data_consolidation(path):
 
 
 # Create a .csv file containing all of the data from the text file
-def createCSV(path):
+def create_CSV(path):
+    # Create the CSV file
     text_file = path
     csv_file = path.replace(".txt", ".csv")
     text_input = csv.reader(open(text_file), delimiter = "|")
@@ -121,6 +122,14 @@ def createCSV(path):
 
 # Create an Excel file based on the .csv file
 def createExcel(path):
+    excel_file = path.replace(".csv", ".xlsx")
     df = pd.read_csv(path)
-    print(df)
-    #df.to_excel(path + "\\" + "Defib_Shock_Master_Data_File.xlsx", "Sheet1")
+    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name = 'Defib Master Data')
+    workbook = writer.book
+    worksheet = writer.sheets['Defib Master Data']
+    #df.drop(0, axis=1)
+    worksheet.set_column('A:A', 4)
+    worksheet.set_column('B:D', 17)
+    writer.save()
+

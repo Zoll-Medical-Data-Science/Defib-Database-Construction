@@ -16,7 +16,6 @@ def run_data_manipulation(path):
                       "Compression_Master_Data_File.xlsx")
         except PermissionError:
             print("\nMaster Data Excel file is open.  Aborting.  Please close and re-run script.")
-            return "N/A", "N/A"
 
     # Ensure only .xlsx, .xls, .xlsb, and .xlsm are included
     filtered_list = []
@@ -38,7 +37,6 @@ def run_data_manipulation(path):
     # If there are no .xlsx, .xls, .xlsb, or .xlsm files in the folder:
     if len(filtered_list) == 0:
         print("\nNo Excel files to manipulate.  Aborting Script.")
-        return "N/A", "N/A"
 
     # Create directories to place all processed Excel files as well as all non-relevant files
     excel_directory_name = create_directory(path, "Processed_Excel_Files", "Excel")

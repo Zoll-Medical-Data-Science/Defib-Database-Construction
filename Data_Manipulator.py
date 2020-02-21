@@ -10,6 +10,14 @@ import statistics
 #  rows and their times
 def defib_shock_data_consolidation(path):
     file_list = os.listdir(path)
+    # If the master .xlsx file is open, abort the script and ask the user to close it to avoid an exception
+    if "Defib_Shock_Master_Data_File.xlsx" in file_list:
+        try:
+            os.rename(path + "\\" + "Defib_Shock_Master_Data_File.xlsx", path + "\\" +
+                      "Defib_Shock_Master_Data_File.xlsx")
+        except PermissionError:
+            print("\nMaster Data Excel file is open.  Aborting.  Please close and re-run script.")
+            return "N/A", "N/A"
 
     # Ensure only .txt files are included
     user_list = []
@@ -20,33 +28,30 @@ def defib_shock_data_consolidation(path):
                                            "Defib_Shock_Case_Tracker.txt"):
             user_list.append(list_element)
 
-    # Exit function if there are no .txt files in the folder
+    # If there are no .txt or .log files in the folder:
     if len(user_list) == 0:
-        print("\nNo .txt files to manipulate.  Aborting Script.")
-        return "N/A"
+        # If the output files have already been created
+        if ("Defib_Shock_Master_Data_File.xlsx" in file_list) or ("Defib_Shock_Extracted_Data.txt" in file_list) or \
+                ("Defib_Shock_Case_Tracker.txt" in file_list):
+            print("\nNo .txt or .log files to manipulate.  Updating output files and ending the script.")
+            return path + "\\" + "Defib_Shock_Extracted_Data.txt", path + "\\" + "Defib_Shock_Case_Tracker.txt"
 
-    # Create a directory to place all processed .txt files (if one hasn't already been created)
-    directory_name = path + "\\" + "Processed_.txt_Files"
-    try:
-        os.mkdir(directory_name)
-        print("\nSuccessfully created the directory %s to store processed .txt files." % directory_name)
-    except OSError:
-        print("\nProcessed .txt files are stored in the directory %s." % directory_name)
+        # If the script hasn't successfully run in the folder yet
+        else:
+            print("\nNo .txt or .log files to manipulate.  Aborting Script.")
+            return "N/A", "N/A"
 
-    # Create a directory to place all .log files (if one hasn't already been created)
-    log_directory_name = path + "\\" + ".log Files"
-    try:
-        os.mkdir(log_directory_name)
-        print("\nSuccessfully created the directory %s to store .log files." % log_directory_name)
-    except OSError:
-        pass
+    # Create directories to place all processed .txt and .log files (if they hasn't already been created)
+    text_directory_name = create_directory(path, "Processed_.txt_Files", ".txt")
+    log_directory_name = create_directory(path, ".log Files", ".log")
 
-    # Iterate over every relevant file in the folder and manipulate them
+    # Create new text files to store data, or append to existing files if they already exist
     print("\nOne moment please...")
     file_name_1 = path + "\\" + "Defib_Shock_Extracted_Data.txt"
     file_name_2 = path + "\\" + "Defib_Shock_Case_Tracker.txt"
     totals_file = open(file_name_1, "a+")
     case_file = open(file_name_2, "a+")
+    # Iterate over every relevant file in the folder and manipulate them
     for j in range(0, len(user_list)):
         file_name = user_list[j]
         file_path = path + "\\" + user_list[j]
@@ -93,13 +98,25 @@ def defib_shock_data_consolidation(path):
         case_file.write(updated_name_format + "  |  " + shock_flag + "  |  " + str(number_of_shocks) + "\n")
 
         # Move current .txt to the directory for processed .txt files
-        shutil.move(file_path, directory_name + "\\" + user_list[j])
+        shutil.move(file_path, text_directory_name + "\\" + user_list[j])
 
     totals_file.close()
     case_file.close()
 
     print("\n.txt files manipulated successfully.")
     return file_name_1, file_name_2
+
+
+# Create director for .txt and .log files if they haven't already been created
+def create_directory(path, extension, file_type):
+    directory_name = path + "\\" + extension
+    try:
+        os.mkdir(directory_name)
+        print("\nSuccessfully created the directory %s to store processed %s files." % (directory_name, file_type))
+    except OSError:
+        print("\n%s files are stored in the directory %s." % (file_type, directory_name))
+    finally:
+        return directory_name
 
 
 # Remove '.txt' and trailing digits from the end of the file name (this is what will be pasted in the file)
@@ -170,13 +187,15 @@ def add_stats(excel_path):
     number_of_cases = 0
     number_of_cases_with_shocks = 0
     number_of_shocks = []
+    number_of_shocks_in_shock_cases = []
     # Iterate over every element in the workbook
     for i in range(0, 2):
         worksheet = workbook.worksheets[i]
         for j in range(1, worksheet.max_column + 1):
             for k in range(2, worksheet.max_row + 1):
                 try:
-                    worksheet.cell(row = k, column = j).value = float(str(worksheet.cell(row = k, column = j).value).strip())
+                    worksheet.cell(row = k, column = j).value = float(str(worksheet.cell(row = k, column = j).
+                                                                          value).strip())
                 except ValueError:
                     worksheet.cell(row = k, column = j).value = str(worksheet.cell(row = k, column = j).value).strip()
                 # If statement to line up with column in case tracker sheet recording 'Y/N', but not the title row
@@ -188,29 +207,42 @@ def add_stats(excel_path):
                         number_of_cases_with_shocks += 1
                 # Count the total number of shocks of all cases combined
                 if i == 1 and j == 4 and k != 1:
-                    number_of_shocks.append(worksheet.cell(row = k, column = j).value)
+                    case_shock_count = worksheet.cell(row = k, column = j).value
+                    number_of_shocks.append(case_shock_count)
+                    if case_shock_count > 0:
+                        number_of_shocks_in_shock_cases.append(case_shock_count)
+
     # Calculate remaining statistics
     shock_count = 0
     for p in range(0, len(number_of_shocks)):
         shock_count += number_of_shocks[p]
+    shock_percent = float(100 * (number_of_cases_with_shocks / number_of_cases))
     shock_mean = float(shock_count/number_of_cases)
+    shock_mean2 = float(shock_count/number_of_cases_with_shocks)
     shock_std_dev = float(statistics.stdev(number_of_shocks, shock_mean))
+    shock_std_dev2 = float(statistics.stdev(number_of_shocks_in_shock_cases, shock_mean2))
 
     # Paste statistics into workbook
     worksheet = workbook.worksheets[2]
-    worksheet.cell(row = 1, column = 1).value = "Total Number of Cases:"
+    worksheet.cell(row=1, column=1).value = "Total Number of Cases:"
     worksheet.cell(row=2, column=1).value = "Number of Cases with Shocks:"
     worksheet.cell(row=3, column=1).value = "Percent of Cases with a Shock (%):"
-    worksheet.cell(row=4, column=1).value = "Average Number of Shocks per Case:"
-    worksheet.cell(row=5, column=1).value = "Shock Standard Deviation:"
+    worksheet.cell(row=4, column=1).value = "Total Number of Shocks:"
+    worksheet.cell(row=5, column=1).value = "Average Number of Shocks per Case:"
+    worksheet.cell(row=6, column=1).value = "Average Number of Shocks in Cases with Shocks:"
+    worksheet.cell(row=7, column=1).value = "Shock Standard Deviation:"
+    worksheet.cell(row=8, column=1).value = "Shock Standard Deviation in Cases with Shocks:"
     worksheet.cell(row=1, column=2).value = number_of_cases
     worksheet.cell(row=2, column=2).value = number_of_cases_with_shocks
-    worksheet.cell(row=3, column=2).value = float(100 * (number_of_cases_with_shocks/number_of_cases))
-    worksheet.cell(row=4, column=2).value = shock_mean
-    worksheet.cell(row=5, column=2).value = shock_std_dev
+    worksheet.cell(row=3, column=2).value = shock_percent
+    worksheet.cell(row=4, column=2).value = shock_count
+    worksheet.cell(row=5, column=2).value = shock_mean
+    worksheet.cell(row=6, column=2).value = shock_mean2
+    worksheet.cell(row=7, column=2).value = shock_std_dev
+    worksheet.cell(row=8, column=2).value = shock_std_dev2
     # Change title column dimensions
-    worksheet.column_dimensions['A'].width = 31
-    # Make all titles bold
-    for m in range(1, 6):
+    worksheet.column_dimensions['A'].width = 44
+    # Make all titles bold in stats sheet
+    for m in range(1, 9):
         worksheet.cell(row = m, column = 1).font = Font(bold = True)
     workbook.save(excel_path)

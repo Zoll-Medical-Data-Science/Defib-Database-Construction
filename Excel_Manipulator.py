@@ -16,6 +16,7 @@ def run_data_manipulation(path):
                       "Compression_Master_Data_File.xlsx")
         except PermissionError:
             print("\nMaster Data Excel file is open.  Aborting.  Please close and re-run script.")
+            return
 
     # Ensure only .xlsx, .xls, .xlsb, and .xlsm are included
     filtered_list = []
@@ -37,6 +38,7 @@ def run_data_manipulation(path):
     # If there are no .xlsx, .xls, .xlsb, or .xlsm files in the folder:
     if len(filtered_list) == 0:
         print("\nNo Excel files to manipulate.  Aborting Script.")
+        return
 
     # Create directories to place all processed Excel files as well as all non-relevant files
     excel_directory_name = create_directory(path, "Processed_Excel_Files", "Excel")
@@ -98,6 +100,7 @@ def run_data_manipulation(path):
                 worksheet.cell(row=1, column=k).font = Font(bold=True)
                 worksheet.column_dimensions[get_column_letter(k)].width = 20
             workbook.save(file_path)
+            workbook.close()
 
             # Move Excel file to appropriate folder
             shutil.move(file_path, excel_directory_name + "\\" + file)
@@ -111,6 +114,8 @@ def run_data_manipulation(path):
 
     # Save Master Data File
     master_workbook.save(filename=path + "\\" + "Compression_Master_Data_File.xlsx")
+    master_workbook.close()
+    return
 
 
 # Create a directory in the specified path if one hasn't already been created

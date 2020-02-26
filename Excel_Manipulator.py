@@ -74,20 +74,23 @@ def run_data_manipulation(path):
             # Edit the file name to only include what's needed and store in a variable
             case_id = remove_extra_characters(file)
 
-            # Check 'Case ID' against the values in the master data sheet to see this file has already been processed
-            is_repeat = False
-            for n in range(2, master_sheet.max_row + 1):
-                if case_id == master_sheet.cell(row=n, column=1).value:
-                    is_repeat = True
-            if is_repeat:
-                print("\nFile %s has already been processed.  Adding it back into the specified directory." % file)
-                shutil.move(file_path, excel_directory_name + "\\" + file)
-                continue
-
             # Open Excel File
             workbook = openpyxl.load_workbook(filename=file_path)
             worksheet = workbook.active
             compression_count = worksheet.max_row - 1
+
+            # Check 'Case ID' against the values in the master data sheet to see this file has already been processed
+            is_repeat = False
+            for n in range(2, master_sheet.max_row + 1):
+                if case_id == master_sheet.cell(row=n, column=1).value:
+                    # If 'Case ID' matches, confirm a repeat using 'Compression Count'
+                    if compression_count == master_sheet.cell(row=n, column=2).value:
+                        is_repeat = True
+            if is_repeat:
+                print("\nFile %s has already been processed.  Adding it back into the specified directory." % file)
+                workbook.close()
+                shutil.move(file_path, excel_directory_name + "\\" + file)
+                continue
 
             # Create new column A and add 'Case ID' for every row with data
             worksheet.insert_cols(1)
@@ -157,4 +160,4 @@ def remove_extra_characters(file_name):
             return file_name.replace(chars_to_remove, "")
 
 
-run_data_manipulation(r"C:\Users\mnarcisi\Documents\Mike\Scientific Affairs\Excel_File_Testing\AY2")
+run_data_manipulation(r"C:\Users\mnarcisi\Documents\Mike\Scientific Affairs\Excel_File_Testing\Main AY1")

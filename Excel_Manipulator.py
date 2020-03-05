@@ -8,6 +8,7 @@ from openpyxl.styles import Font
 # Function used to add "Case ID" to first column of each Excel file, and to create a master file recording "Case ID"
 # and total number of compressions
 def run_excel_manipulation(path):
+    print("\n\033[1m" + "Current Directory: " + path)
     file_list = os.listdir(path)
     # If the master .xlsx file is open, abort the script and ask the user to close it to avoid an exception
     if "Compression_Master_Data_File.xlsx" in file_list:

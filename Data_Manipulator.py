@@ -8,8 +8,10 @@ import statistics
 
 #  This function is used to filter all text files in a folder of sample defib data and pick out all "defib shock"
 #  rows and their times
-def defib_shock_data_consolidation(path):
+def run_data_manipulation(path):
+    print("\n\033[1m" + "Current Directory: " + path)
     file_list = os.listdir(path)
+
     # If the master .xlsx file is open, abort the script and ask the user to close it to avoid an exception
     if "Defib_Shock_Master_Data_File.xlsx" in file_list:
         try:
@@ -41,7 +43,7 @@ def defib_shock_data_consolidation(path):
             print("\nNo .txt or .log files to manipulate.  Aborting Script.")
             return "N/A", "N/A"
 
-    # Create directories to place all processed .txt and .log files (if they hasn't already been created)
+    # Create directories to place all processed .txt and .log files (if they haven't already been created)
     text_directory_name = create_directory(path, "Processed_.txt_Files", ".txt")
     log_directory_name = create_directory(path, ".log Files", ".log")
 
@@ -125,7 +127,7 @@ def remove_extra_characters(file_name):
     is_extra_digit = False
     # Reverse string to find last instance of '_'
     for k in range(len(file_name), 0, -1):
-        reversed_file_name = reversed_file_name + file_name[k - 1]
+        reversed_file_name += file_name[k - 1]
     underscore_marker = reversed_file_name.find("_")
     # If '_' has a character (letter) to its left, it doesn't have extra digits
     if underscore_marker != -1:
@@ -246,3 +248,12 @@ def add_stats(excel_path):
     for m in range(1, 9):
         worksheet.cell(row = m, column = 1).font = Font(bold = True)
     workbook.save(excel_path)
+
+
+data_extraction_file, case_file = run_data_manipulation(
+    r"C:\Users\mnarcisi\Documents\Mike\Scientific Affairs\Data_Initil_Testing")
+if data_extraction_file != "N/A" and case_file != "N/A":
+    data_csv_file = create_csv(data_extraction_file, "Element Name", "Time (sec)", "File Name")
+    case_csv_file = create_csv(case_file, "File Name", "Shock (Y/N)", "Number of Shocks")
+    excel_file = write_excel_remove_csv(data_csv_file, case_csv_file)
+    add_stats(excel_file)

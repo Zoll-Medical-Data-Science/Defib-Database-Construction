@@ -357,9 +357,9 @@ def find_compression_pauses(path):
         else:
             in_excel_not_cpr.append(case)
 
-        for case_number in cpr_period_list:
-            if case_number not in compression_case_list:
-                in_cpr_not_excel.append(case_number)
+    for case_number in cpr_period_list:
+        if case_number not in compression_case_list:
+            in_cpr_not_excel.append(case_number)
 
     # Save Master Data File
     save_path = path + "\\" + "Compression_Pause_Master_Data_File.xlsx"

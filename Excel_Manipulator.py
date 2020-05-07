@@ -73,7 +73,10 @@ def run_excel_manipulation(path):
             os.rename(file_path, file_path)
 
             # Edit the file name to only include what's needed and store in a variable
-            case_id = remove_extra_characters(file)
+            try:
+                case_id = remove_extra_characters_2(file)
+            except IndexError:
+                case_id = file[0: len(file) - 5]
 
             # Open Excel File
             workbook = openpyxl.load_workbook(filename=file_path)
@@ -161,4 +164,16 @@ def remove_extra_characters(file_name):
             return file_name.replace(chars_to_remove, "")
 
 
-run_excel_manipulation(r"C:\Users\mnarcisi\Documents\Mike\Scientific Affairs\Excel_File_Testing\Main AY1")
+# Re-work "Remove Extra Characters" Function
+def remove_extra_characters_2(file_name):
+    file_name = file_name[0: len(file_name) - 5]
+    file_name_tail = file_name[len(file_name) - 3: len(file_name)]
+    if file_name_tail == "_01" or file_name_tail == "_02":
+        return file_name[0: len(file_name) - 3]
+    else:
+        return file_name
+
+
+
+
+run_excel_manipulation(r"C:\Users\mnarcisi\Documents\Mike\Scientific Affairs\Excel_File_Testing")

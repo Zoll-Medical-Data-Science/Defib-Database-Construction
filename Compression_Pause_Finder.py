@@ -87,8 +87,8 @@ def find_compression_pauses(path):
 
             if permission_flag:
                 # Record the current case's CPR Period
-                cpr_start = []
-                cpr_end = []
+                cpr_start = 0
+                cpr_end = 0
                 for m in range(2, cpr_sheet.max_row + 1):
                     if cpr_sheet.cell(row=m, column=1).value == case:
                         cpr_start = cpr_sheet.cell(row=m, column=2).value

@@ -86,13 +86,16 @@ def find_compression_pauses(path):
                     permission_flag = False
 
             if permission_flag:
-                # Record the current case's CPR Period
-                cpr_start = 0
-                cpr_end = 0
+                # Record the current case's CPR Periods
+                cpr_start = []
+                cpr_end = []
+                cpr_indicator_flag = False
                 for m in range(2, cpr_sheet.max_row + 1):
                     if cpr_sheet.cell(row=m, column=1).value == case:
-                        cpr_start = cpr_sheet.cell(row=m, column=2).value
-                        cpr_end = cpr_sheet.cell(row=m, column=3).value
+                        cpr_start.append(cpr_sheet.cell(row=m, column=2).value)
+                        cpr_end.append(cpr_sheet.cell(row=m, column=3).value)
+                        cpr_indicator_flag = True
+                    elif cpr_indicator_flag:
                         break
 
                 # Create new Compression Workbook
@@ -140,11 +143,12 @@ def find_compression_pauses(path):
                     compression_worksheet[get_column_letter(9) + str(k)].fill = red_color
 
                     if k > 1:
-                        # Insert if Compression was during the CPR period
-                        if cpr_start <= compression_worksheet.cell(row=k, column=4).value <= cpr_end:
-                            compression_worksheet.cell(row=k, column=10).value = "TRUE"
-                        else:
-                            compression_worksheet.cell(row=k, column=10).value = "FALSE"
+                        # Insert True or False to show if Compression was during one of the CPR periods
+                        comp_in_cpr = "FALSE"
+                        for h in range(0, len(cpr_start)):
+                            if cpr_start[h] <= compression_worksheet.cell(row=k, column=4).value <= cpr_end[h]:
+                                comp_in_cpr = "TRUE"
+                        compression_worksheet.cell(row=k, column=10).value = comp_in_cpr
 
                         # Insert the Compression Period (Time between current and previous compression)
                         try:

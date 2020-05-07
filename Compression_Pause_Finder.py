@@ -87,8 +87,8 @@ def find_compression_pauses(path):
 
             if permission_flag:
                 # Record the current case's CPR Period
-                cpr_start = 0
-                cpr_end = 0
+                cpr_start = []
+                cpr_end = []
                 for m in range(2, cpr_sheet.max_row + 1):
                     if cpr_sheet.cell(row=m, column=1).value == case:
                         cpr_start = cpr_sheet.cell(row=m, column=2).value
@@ -353,29 +353,19 @@ def find_compression_pauses(path):
                 except ZeroDivisionError:
                     seconds_sheet.cell(row=j + 2, column=11).value = 0
 
-                    #if compression_case_list[j] not in cpr_period_list:
-         #   check_missing_cpr_cases.append(compression_case_list[j])
+        # Add missing files to the appropriate lists
+        else:
+            in_excel_not_cpr.append(case)
+
+        for case_number in cpr_period_list:
+            if case_number not in compression_case_list:
+                in_cpr_not_excel.append(case_number)
 
     # Save Master Data File
     save_path = path + "\\" + "Compression_Pause_Master_Data_File.xlsx"
     master_workbook.save(filename=save_path)
     master_workbook.close()
     print("\nCompression Pause Data Workbook saved to " + save_path + ".")
-
-#    for case in cpr_period_list:
- #       if case not in compression_case_list:
-  #          in_cpr_not_excel.append(case)
-
-#    for case in compression_case_list:
- #       if case not in cpr_period_list:
-  #          in_excel_not_cpr.append(case)
-
-
-
-
-
-
-
 
 
 # Remove un-needed characters from the end of the file name

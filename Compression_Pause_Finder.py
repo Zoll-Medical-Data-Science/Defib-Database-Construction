@@ -34,25 +34,28 @@ def find_compression_pauses(path):
         worksheet = master_workbook.worksheets[a]
         worksheet.cell(row=1, column=1).value = "Case ID"
         worksheet.cell(row=1, column=2).value = "Total Compressions"
-        worksheet.cell(row=1, column=3).value = "Total Pauses"
-        worksheet.cell(row=1, column=4).value = "Mean Compression Period (CP)"
-        worksheet.cell(row=1, column=5).value = "Minimum CP"
-        worksheet.cell(row=1, column=6).value = "Maximum CP"
-        worksheet.cell(row=1, column=7).value = "CP Standard Deviation"
-        worksheet.cell(row=1, column=8).value = "CP Variance"
-        worksheet.cell(row=1, column=9).value = "Median CP"
-        worksheet.cell(row=1, column=10).value = "CP Interquartile Range"
-        worksheet.cell(row=1, column=11).value = "CP Standard Error"
-        for p in range(1, 12):
+        worksheet.cell(row=1, column=3).value = "Total Compression Periods"
+        worksheet.cell(row=1, column=4).value = "Total Pauses"
+        worksheet.cell(row=1, column=5).value = "Mean Compression Period (CP)"
+        worksheet.cell(row=1, column=6).value = "Minimum CP"
+        worksheet.cell(row=1, column=7).value = "Maximum CP"
+        worksheet.cell(row=1, column=8).value = "CP Standard Deviation"
+        worksheet.cell(row=1, column=9).value = "CP Variance"
+        worksheet.cell(row=1, column=10).value = "Median CP"
+        worksheet.cell(row=1, column=11).value = "CP Interquartile Range"
+        worksheet.cell(row=1, column=12).value = "CP Standard Error"
+        for p in range(1, 13):
             worksheet.cell(row=1, column=p).font = Font(bold=True)
             worksheet.column_dimensions[get_column_letter(p)].width = 18
-        worksheet.column_dimensions[get_column_letter(4)].width = 28
-        worksheet.column_dimensions[get_column_letter(7)].width = 26
-        worksheet.column_dimensions[get_column_letter(10)].width = 26
-        worksheet.column_dimensions[get_column_letter(11)].width = 22
+        worksheet.column_dimensions[get_column_letter(3)].width = 26
+        worksheet.column_dimensions[get_column_letter(5)].width = 28
+        worksheet.column_dimensions[get_column_letter(8)].width = 26
+        worksheet.column_dimensions[get_column_letter(11)].width = 26
+        worksheet.column_dimensions[get_column_letter(12)].width = 22
 
     # Initialize list variables
     cpr_period_list = []
+    final_compression_file_list = []
     in_cpr_not_excel = []
     in_excel_not_cpr = []
     red_color = PatternFill(start_color='FF0000', end_color='FF0000', fill_type='solid')
@@ -63,7 +66,7 @@ def find_compression_pauses(path):
     # Fill list variables with Case ID numbers to later match up
     cpr_period_file = openpyxl.load_workbook("Clean_CPR_Periods.xlsx")
     cpr_sheet = cpr_period_file.active
-    for i in range(1, cpr_sheet.max_row + 1):
+    for i in range(2, cpr_sheet.max_row + 1):
         cpr_period_list.append(cpr_sheet.cell(row=i, column=1).value)
 
     # Loop through all Compression data files that have CPR periods, and output an updated Compression file for each
@@ -73,6 +76,7 @@ def find_compression_pauses(path):
 
     for j in range(0, len(compression_case_list)):
         case = remove_extra_characters_2(compression_case_list[j])
+        final_compression_file_list.append(case)
         if case in cpr_period_list:
             # If the current compression pause data file is open, skip it and notify user
             permission_flag = True
@@ -151,49 +155,66 @@ def find_compression_pauses(path):
                         compression_worksheet.cell(row=k, column=10).value = comp_in_cpr
 
                         # Insert the Compression Period (Time between current and previous compression)
-                        try:
-                            comp_period = compression_worksheet.cell(row=k, column=4).value - \
-                                compression_worksheet.cell(row=k-1, column=4).value
-                        except TypeError:
-                            comp_period = 0
-                        compression_worksheet.cell(row=k, column=11).value = comp_period
-                        compression_worksheet.cell(row=k, column=12).value = comp_period / 1000
-
-                        # Insert Pause Indicator
-                        if comp_period > 2000:
-                            pause = "TRUE"
-                            for q in range(1, 15):
-                                if q != 9:
-                                    compression_worksheet[get_column_letter(q) + str(k)].fill = yellow_color
-                        else:
-                            pause = "FALSE"
-                        compression_worksheet.cell(row=k, column=13).value = pause
-
-                        # Insert Artifact Indicator
-                        if pause == "TRUE":
-                            # Find the index of the previous pause
-                            previous_pause_index = 2
-                            for n in range(k-1, 1, -1):
-                                if compression_worksheet.cell(row=n, column=13).value == "TRUE":
-                                    previous_pause_index = n
-                                    break
-                            # Flag less than 3 compressions between pauses as artifact
-                            if k - previous_pause_index < 4:
-                                for w in range(previous_pause_index, k):
-                                    compression_worksheet.cell(row=w, column=14).value = "Artifact"
-                                    for x in range(1, 15):
-                                        if x != 9:
-                                            compression_worksheet[get_column_letter(x) + str(w)].fill = grey_color
-                                compression_worksheet.cell(row=k, column=14).value = "Lead Pause"
-                                for q in range(1, 15):
-                                    if q != 9:
-                                        compression_worksheet[get_column_letter(q) + str(k)].fill = yellow_color
-
-                        # Color row a green color to indicate if compression is outside of the CPR period
-                        if compression_worksheet.cell(row=k, column=10).value == "FALSE":
+                        comp_period = ""
+                        if k == 2 and comp_in_cpr == "TRUE":  # First compression should always have a "N/A" comp period
+                            comp_period = "N/A"
+                        elif comp_in_cpr == "TRUE":
+                            # If previous compression wasn't in CPR period, this compression has no CPR period
+                            if compression_worksheet.cell(row=k - 1, column=10).value == "FALSE":
+                                comp_period = "N/A"
+                            else:
+                                comp_period = compression_worksheet.cell(row=k, column=4).value - \
+                                              compression_worksheet.cell(row=k - 1, column=4).value
+                        else:  # Don't include compression period data for compressions done outside of the CPR period
                             for f in range(1, 15):
                                 if f != 9:
                                     compression_worksheet[get_column_letter(f) + str(k)].fill = dark_green_color
+                        compression_worksheet.cell(row=k, column=11).value = comp_period
+                        try:
+                            compression_worksheet.cell(row=k, column=12).value = comp_period / 1000
+                        except TypeError:
+                            if comp_period == "N/A":
+                                compression_worksheet.cell(row=k, column=12).value = "N/A"
+                            else:
+                                compression_worksheet.cell(row=k, column=12).value = ""
+
+                        # If compression period is a number, continue formulating other data
+                        try:
+                            comp_period = int(comp_period)  # Ensure compression period is a number
+                            # Insert Pause Indicator
+                            if comp_period > 2000:
+                                pause = "TRUE"
+                                for q in range(1, 15):
+                                    if q != 9:
+                                        compression_worksheet[get_column_letter(q) + str(k)].fill = yellow_color
+                            else:
+                                pause = "FALSE"
+                            compression_worksheet.cell(row=k, column=13).value = pause
+
+                            # Insert Artifact Indicator
+                            if pause == "TRUE":
+                                # Find the index of the previous pause
+                                previous_pause_index = 2
+                                # Find the index of the previous pause, or compression before previous non-CPR period
+                                for n in range(k - 1, 1, -1):
+                                    if compression_worksheet.cell(row=n, column=13).value == "TRUE" or \
+                                            compression_worksheet.cell(row=n-1, column=10).value == "FALSE":
+                                        previous_pause_index = n
+                                        break
+                                # Flag less than 3 compressions between pauses as artifact
+                                if k - previous_pause_index < 4:
+                                    for w in range(previous_pause_index, k):
+                                        compression_worksheet.cell(row=w, column=14).value = "Artifact"
+                                        for x in range(1, 15):
+                                            if x != 9:
+                                                compression_worksheet[get_column_letter(x) + str(w)].fill = grey_color
+                                    compression_worksheet.cell(row=k, column=14).value = "Lead Pause"
+                                    for q in range(1, 15):
+                                        if q != 9:
+                                            compression_worksheet[get_column_letter(q) + str(k)].fill = yellow_color
+                        except ValueError:
+                            if comp_period == "N/A":
+                                compression_worksheet.cell(row=k, column=13).value = "FALSE"
 
                 # Loop through worksheet to adjust artifact calculations
                 artifact_index = 1
@@ -237,10 +258,13 @@ def find_compression_pauses(path):
                 stats_sheet.cell(row=5, column=1).value = "Total Compressions"
                 stats_sheet.cell(row=6, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
 
-                stats_sheet.cell(row=8, column=1).value = "Total Pauses"
+                stats_sheet.cell(row=8, column=1).value = "Total Compression Periods"
                 stats_sheet.cell(row=9, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
 
-                for q in range(1, 11):
+                stats_sheet.cell(row=11, column=1).value = "Total Pauses"
+                stats_sheet.cell(row=12, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
+
+                for q in range(1, 13):
                     stats_sheet.cell(row=1, column=q).font = Font(bold=True)
                     stats_sheet.column_dimensions[get_column_letter(q)].width = 18
                 stats_sheet.column_dimensions[get_column_letter(1)].width = 38
@@ -253,19 +277,26 @@ def find_compression_pauses(path):
                 stats_sheet.cell(row=6, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=8, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=9, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=11, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=12, column=1).font = Font(bold=True)
 
                 # Calculate needed statistics
                 compression_period_list = []
+                not_available_list = []
                 pause_count = 0
                 for h in range(2, compression_worksheet.max_row + 1):
-                    if compression_worksheet.cell(row=h, column=10).value != "FALSE":
-                        if compression_worksheet.cell(row=h, column=14).value != "Artifact":
+                    if compression_worksheet.cell(row=h, column=10).value != "FALSE" and \
+                            compression_worksheet.cell(row=h, column=14).value != "Artifact":
+                        if compression_worksheet.cell(row=h, column=11).value == "N/A":
+                            not_available_list.append(compression_worksheet.cell(row=h, column=11).value)
+                        else:
                             compression_period_list.append(compression_worksheet.cell(row=h, column=11).value)
-                            if compression_worksheet.cell(row=h, column=13).value == "TRUE":
-                                pause_count += 1
+                        if compression_worksheet.cell(row=h, column=13).value == "TRUE":
+                            pause_count += 1
                 compression_period_list.sort()
 
                 compression_count = len(compression_period_list)
+                raw_compression_count = compression_count + len(not_available_list)
                 try:
                     mean = float(sum(compression_period_list) / compression_count)
                 except ZeroDivisionError:
@@ -320,9 +351,11 @@ def find_compression_pauses(path):
                     stats_sheet.cell(row=3, column=9).value = 0
                 stats_sheet.cell(row=3, column=10).value = case
 
-                stats_sheet.cell(row=5, column=2).value = compression_count
+                stats_sheet.cell(row=5, column=2).value = raw_compression_count
 
-                stats_sheet.cell(row=8, column=2).value = pause_count
+                stats_sheet.cell(row=8, column=2).value = compression_count
+
+                stats_sheet.cell(row=11, column=2).value = pause_count
 
                 # Save New Compression Data File
                 save_path = new_compression_file_path + "\\" + case + ".xlsx"
@@ -331,39 +364,55 @@ def find_compression_pauses(path):
 
                 # Paste case's statistics into master file
                 master_worksheet.cell(row=j + 2, column=1).value = case
-                master_worksheet.cell(row=j + 2, column=2).value = compression_count
-                master_worksheet.cell(row=j + 2, column=3).value = pause_count
-                master_worksheet.cell(row=j + 2, column=4).value = mean
-                master_worksheet.cell(row=j + 2, column=5).value = minimum
-                master_worksheet.cell(row=j + 2, column=6).value = maximum
-                master_worksheet.cell(row=j + 2, column=7).value = std_dev
-                master_worksheet.cell(row=j + 2, column=8).value = variance
-                master_worksheet.cell(row=j + 2, column=9).value = median
-                master_worksheet.cell(row=j + 2, column=10).value = int_range
-                master_worksheet.cell(row=j + 2, column=11).value = std_error
+                master_worksheet.cell(row=j + 2, column=2).value = raw_compression_count
+                master_worksheet.cell(row=j + 2, column=3).value = compression_count
+                master_worksheet.cell(row=j + 2, column=4).value = pause_count
+                master_worksheet.cell(row=j + 2, column=5).value = mean
+                master_worksheet.cell(row=j + 2, column=6).value = minimum
+                master_worksheet.cell(row=j + 2, column=7).value = maximum
+                master_worksheet.cell(row=j + 2, column=8).value = std_dev
+                master_worksheet.cell(row=j + 2, column=9).value = variance
+                master_worksheet.cell(row=j + 2, column=10).value = median
+                master_worksheet.cell(row=j + 2, column=11).value = int_range
+                master_worksheet.cell(row=j + 2, column=12).value = std_error
 
                 seconds_sheet.cell(row=j + 2, column=1).value = case
-                seconds_sheet.cell(row=j + 2, column=2).value = compression_count
-                seconds_sheet.cell(row=j + 2, column=3).value = pause_count
-                seconds_sheet.cell(row=j + 2, column=4).value = mean / 1000
-                seconds_sheet.cell(row=j + 2, column=5).value = minimum / 1000
-                seconds_sheet.cell(row=j + 2, column=6).value = maximum / 1000
-                seconds_sheet.cell(row=j + 2, column=7).value = std_dev / 1000
-                seconds_sheet.cell(row=j + 2, column=8).value = math.pow(std_dev / 1000, 2)
-                seconds_sheet.cell(row=j + 2, column=9).value = median / 1000
-                seconds_sheet.cell(row=j + 2, column=10).value = int_range / 1000
+                seconds_sheet.cell(row=j + 2, column=2).value = raw_compression_count
+                seconds_sheet.cell(row=j + 2, column=3).value = compression_count
+                seconds_sheet.cell(row=j + 2, column=4).value = pause_count
+                seconds_sheet.cell(row=j + 2, column=5).value = mean / 1000
+                seconds_sheet.cell(row=j + 2, column=6).value = minimum / 1000
+                seconds_sheet.cell(row=j + 2, column=7).value = maximum / 1000
+                seconds_sheet.cell(row=j + 2, column=8).value = std_dev / 1000
+                seconds_sheet.cell(row=j + 2, column=9).value = math.pow(std_dev / 1000, 2)
+                seconds_sheet.cell(row=j + 2, column=10).value = median / 1000
+                seconds_sheet.cell(row=j + 2, column=11).value = int_range / 1000
                 try:
-                    seconds_sheet.cell(row=j + 2, column=11).value = (std_dev / 1000) / math.sqrt(compression_count)
+                    seconds_sheet.cell(row=j + 2, column=12).value = (std_dev / 1000) / math.sqrt(compression_count)
                 except ZeroDivisionError:
-                    seconds_sheet.cell(row=j + 2, column=11).value = 0
+                    seconds_sheet.cell(row=j + 2, column=12).value = 0
 
         # Add missing files to the appropriate lists
         else:
             in_excel_not_cpr.append(case)
 
+    # Add missing files to the appropriate lists
     for case_number in cpr_period_list:
-        if case_number not in compression_case_list:
+        if case_number not in final_compression_file_list:
             in_cpr_not_excel.append(case_number)
+
+    # Add a sheet into the master workbook to show all files which couldn't be processed
+    master_workbook.create_sheet("Missing Case Files")
+    missing_files_sheet = master_workbook.worksheets[2]
+    missing_files_sheet.cell(row=1, column=1).value = "Cases Missing CPR_Period"
+    missing_files_sheet.cell(row=1, column=2).value = "Cases Missing Compression Data"
+    for p in range(1, 3):
+        missing_files_sheet.cell(row=1, column=p).font = Font(bold=True)
+        missing_files_sheet.column_dimensions[get_column_letter(p)].width = 38
+    for b in range(0, len(in_excel_not_cpr)):
+        missing_files_sheet.cell(row=b+2, column=1).value = in_excel_not_cpr[b]
+    for c in range(0, len(in_cpr_not_excel)):
+        missing_files_sheet.cell(row=c+2, column=2).value = in_cpr_not_excel[c]
 
     # Save Master Data File
     save_path = path + "\\" + "Compression_Pause_Master_Data_File.xlsx"

@@ -8,6 +8,7 @@ import statistics
 
 # NOTE: This script takes about 30 minutes to run for 2000 files
 
+
 # Function used to find the Pauses between compressions during each CPR incident, ensuring not to include artifact
 def find_compression_pauses(path):
     file_list = os.listdir(path)
@@ -36,22 +37,37 @@ def find_compression_pauses(path):
         worksheet.cell(row=1, column=2).value = "Total Compressions"
         worksheet.cell(row=1, column=3).value = "Total Compression Periods"
         worksheet.cell(row=1, column=4).value = "Total Pauses"
-        worksheet.cell(row=1, column=5).value = "Mean Compression Period (CP)"
-        worksheet.cell(row=1, column=6).value = "Minimum CP"
-        worksheet.cell(row=1, column=7).value = "Maximum CP"
-        worksheet.cell(row=1, column=8).value = "CP Standard Deviation"
-        worksheet.cell(row=1, column=9).value = "CP Variance"
-        worksheet.cell(row=1, column=10).value = "Median CP"
-        worksheet.cell(row=1, column=11).value = "CP Interquartile Range"
-        worksheet.cell(row=1, column=12).value = "CP Standard Error"
-        for p in range(1, 13):
+        worksheet.cell(row=1, column=5).value = "Compression Period Mean"
+        worksheet.cell(row=1, column=6).value = "Compression Period Minimum"
+        worksheet.cell(row=1, column=7).value = "Compression Period Maximum"
+        worksheet.cell(row=1, column=8).value = "Compression Period Standard Deviation"
+        worksheet.cell(row=1, column=9).value = "Compression Period Variance"
+        worksheet.cell(row=1, column=10).value = "Compression Period Median"
+        worksheet.cell(row=1, column=11).value = "Compression Period Interquartile Range"
+        worksheet.cell(row=1, column=12).value = "Compression Period Standard Error"
+        worksheet.cell(row=1, column=13).value = "Pause Mean"
+        worksheet.cell(row=1, column=14).value = "Pause Minimum"
+        worksheet.cell(row=1, column=15).value = "Pause Maximum"
+        worksheet.cell(row=1, column=16).value = "Pause Standard Deviation"
+        worksheet.cell(row=1, column=17).value = "Pause Variance"
+        worksheet.cell(row=1, column=18).value = "Pause Median"
+        worksheet.cell(row=1, column=19).value = "Pause Interquartile Range"
+        worksheet.cell(row=1, column=20).value = "Pause Standard Error"
+        for p in range(1, 21):
             worksheet.cell(row=1, column=p).font = Font(bold=True)
             worksheet.column_dimensions[get_column_letter(p)].width = 18
         worksheet.column_dimensions[get_column_letter(3)].width = 26
         worksheet.column_dimensions[get_column_letter(5)].width = 28
-        worksheet.column_dimensions[get_column_letter(8)].width = 26
-        worksheet.column_dimensions[get_column_letter(11)].width = 26
-        worksheet.column_dimensions[get_column_letter(12)].width = 22
+        worksheet.column_dimensions[get_column_letter(6)].width = 30
+        worksheet.column_dimensions[get_column_letter(7)].width = 30
+        worksheet.column_dimensions[get_column_letter(8)].width = 38
+        worksheet.column_dimensions[get_column_letter(9)].width = 30
+        worksheet.column_dimensions[get_column_letter(10)].width = 30
+        worksheet.column_dimensions[get_column_letter(11)].width = 38
+        worksheet.column_dimensions[get_column_letter(12)].width = 36
+        worksheet.column_dimensions[get_column_letter(16)].width = 30
+        worksheet.column_dimensions[get_column_letter(19)].width = 31
+        worksheet.column_dimensions[get_column_letter(20)].width = 23
 
     # Initialize list variables
     cpr_period_list = []
@@ -241,49 +257,67 @@ def find_compression_pauses(path):
                 new_compression_workbook.create_sheet("Case Compression Statistics")
                 stats_sheet = new_compression_workbook.worksheets[1]
 
-                stats_sheet.cell(row=1, column=1).value = "Compression Period Statistics"
-                stats_sheet.cell(row=1, column=2).value = "Mean"
-                stats_sheet.cell(row=1, column=3).value = "Minimum"
-                stats_sheet.cell(row=1, column=4).value = "Maximum"
-                stats_sheet.cell(row=1, column=5).value = "Standard Deviation"
-                stats_sheet.cell(row=1, column=6).value = "Variance"
-                stats_sheet.cell(row=1, column=7).value = "Median"
-                stats_sheet.cell(row=1, column=8).value = "Interquartile Range"
-                stats_sheet.cell(row=1, column=9).value = "Standard Error"
-                stats_sheet.cell(row=1, column=10).value = "Case Number"
+                stats_sheet.cell(row=1, column=1).value = "Case Number"
 
-                stats_sheet.cell(row=2, column=1).value = "Milliseconds"
-                stats_sheet.cell(row=3, column=1).value = "Seconds"
+                stats_sheet.cell(row=3, column=1).value = "Compression Period Statistics"
+                stats_sheet.cell(row=3, column=2).value = "Mean"
+                stats_sheet.cell(row=3, column=3).value = "Minimum"
+                stats_sheet.cell(row=3, column=4).value = "Maximum"
+                stats_sheet.cell(row=3, column=5).value = "Standard Deviation"
+                stats_sheet.cell(row=3, column=6).value = "Variance"
+                stats_sheet.cell(row=3, column=7).value = "Median"
+                stats_sheet.cell(row=3, column=8).value = "Interquartile Range"
+                stats_sheet.cell(row=3, column=9).value = "Standard Error"
 
-                stats_sheet.cell(row=5, column=1).value = "Total Compressions"
-                stats_sheet.cell(row=6, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
+                stats_sheet.cell(row=4, column=1).value = "Milliseconds"
+                stats_sheet.cell(row=5, column=1).value = "Seconds"
 
-                stats_sheet.cell(row=8, column=1).value = "Total Compression Periods"
-                stats_sheet.cell(row=9, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
+                stats_sheet.cell(row=7, column=1).value = "Pause Statistics"
+                stats_sheet.cell(row=7, column=2).value = "Mean"
+                stats_sheet.cell(row=7, column=3).value = "Minimum"
+                stats_sheet.cell(row=7, column=4).value = "Maximum"
+                stats_sheet.cell(row=7, column=5).value = "Standard Deviation"
+                stats_sheet.cell(row=7, column=6).value = "Variance"
+                stats_sheet.cell(row=7, column=7).value = "Median"
+                stats_sheet.cell(row=7, column=8).value = "Interquartile Range"
+                stats_sheet.cell(row=7, column=9).value = "Standard Error"
 
-                stats_sheet.cell(row=11, column=1).value = "Total Pauses"
+                stats_sheet.cell(row=8, column=1).value = "Milliseconds"
+                stats_sheet.cell(row=9, column=1).value = "Seconds"
+
+                stats_sheet.cell(row=11, column=1).value = "Total Compressions"
                 stats_sheet.cell(row=12, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
 
+                stats_sheet.cell(row=14, column=1).value = "Total Compression Periods"
+                stats_sheet.cell(row=15, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
+
+                stats_sheet.cell(row=17, column=1).value = "Total Pauses"
+                stats_sheet.cell(row=18, column=1).value = "(Minus Artifact and Data outside of CPR Period)"
+
+                stats_sheet.cell(row=1, column=1).font = Font(bold=True)
                 for q in range(1, 13):
-                    stats_sheet.cell(row=1, column=q).font = Font(bold=True)
+                    stats_sheet.cell(row=3, column=q).font = Font(bold=True)
+                    stats_sheet.cell(row=7, column=q).font = Font(bold=True)
                     stats_sheet.column_dimensions[get_column_letter(q)].width = 18
                 stats_sheet.column_dimensions[get_column_letter(1)].width = 38
                 stats_sheet.column_dimensions[get_column_letter(5)].width = 23
                 stats_sheet.column_dimensions[get_column_letter(8)].width = 24
                 stats_sheet.column_dimensions[get_column_letter(9)].width = 20
-                stats_sheet.cell(row=2, column=1).font = Font(bold=True)
-                stats_sheet.cell(row=3, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=4, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=5, column=1).font = Font(bold=True)
-                stats_sheet.cell(row=6, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=8, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=9, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=11, column=1).font = Font(bold=True)
                 stats_sheet.cell(row=12, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=14, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=15, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=17, column=1).font = Font(bold=True)
+                stats_sheet.cell(row=18, column=1).font = Font(bold=True)
 
-                # Calculate needed statistics
+                # Count all compression periods and pauses
                 compression_period_list = []
                 not_available_list = []
-                pause_count = 0
+                pause_list = []
                 for h in range(2, compression_worksheet.max_row + 1):
                     if compression_worksheet.cell(row=h, column=10).value != "FALSE" and \
                             compression_worksheet.cell(row=h, column=14).value != "Artifact":
@@ -292,70 +326,113 @@ def find_compression_pauses(path):
                         else:
                             compression_period_list.append(compression_worksheet.cell(row=h, column=11).value)
                         if compression_worksheet.cell(row=h, column=13).value == "TRUE":
-                            pause_count += 1
+                            pause_list.append(compression_worksheet.cell(row=h, column=11).value)
                 compression_period_list.sort()
+                pause_list.sort()
 
+                # Calculate needed statistics
                 compression_count = len(compression_period_list)
                 raw_compression_count = compression_count + len(not_available_list)
+                pause_count = len(pause_list)
+
+                cp_mean = get_mean_value(compression_period_list)
+                pause_mean = get_mean_value(pause_list)
+
+                cp_minimum = get_minimum_value(compression_period_list)
+                pause_minimum = get_minimum_value(pause_list)
+
+                cp_maximum = get_maximum_value(compression_period_list)
+                pause_maximum = get_maximum_value(pause_list)
+
                 try:
-                    mean = float(sum(compression_period_list) / compression_count)
-                except ZeroDivisionError:
-                    mean = 0
-                try:
-                    minimum = compression_period_list[0]
-                except IndexError:
-                    minimum = 0
-                try:
-                    maximum = compression_period_list[compression_count - 1]
-                except IndexError:
-                    maximum = 0
-                try:
-                    std_dev = statistics.stdev(compression_period_list, mean)
+                    cp_std_dev = statistics.stdev(compression_period_list, cp_mean)
                 except statistics.StatisticsError:
-                    std_dev = 0
-                variance = math.pow(std_dev, 2)
+                    cp_std_dev = 0
                 try:
-                    median = get_median_value(compression_period_list)
+                    pause_std_dev = statistics.stdev(pause_list, pause_mean)
+                except statistics.StatisticsError:
+                    pause_std_dev = 0
+
+                cp_variance = math.pow(cp_std_dev, 2)
+                pause_variance = math.pow(pause_std_dev, 2)
+
+                try:
+                    cp_median = get_median_value(compression_period_list)
                 except IndexError:
-                    median = 0
+                    cp_median = 0
                 try:
-                    int_range = get_interquartile_range_values(compression_period_list, median)
+                    pause_median = get_median_value(pause_list)
                 except IndexError:
-                    int_range = 0
+                    pause_median = 0
+
                 try:
-                    std_error = std_dev / math.sqrt(compression_count)
+                    cp_int_range = get_interquartile_range_values(compression_period_list, cp_median)
+                except IndexError:
+                    cp_int_range = 0
+                try:
+                    pause_int_range = get_interquartile_range_values(pause_list, pause_median)
+                except IndexError:
+                    pause_int_range = 0
+
+                try:
+                    cp_std_error = cp_std_dev / math.sqrt(compression_count)
                 except ZeroDivisionError:
-                    std_error = 0
+                    cp_std_error = 0
+                try:
+                    pause_std_error = pause_std_dev / math.sqrt(pause_count)
+                except ZeroDivisionError:
+                    pause_std_error = 0
 
                 # Paste statistics into sheet
-                stats_sheet.cell(row=2, column=2).value = mean
-                stats_sheet.cell(row=2, column=3).value = minimum
-                stats_sheet.cell(row=2, column=4).value = maximum
-                stats_sheet.cell(row=2, column=5).value = std_dev
-                stats_sheet.cell(row=2, column=6).value = variance
-                stats_sheet.cell(row=2, column=7).value = median
-                stats_sheet.cell(row=2, column=8).value = int_range
-                stats_sheet.cell(row=2, column=9).value = std_error
-                stats_sheet.cell(row=2, column=10).value = case
+                stats_sheet.cell(row=1, column=2).value = case
 
-                stats_sheet.cell(row=3, column=2).value = mean / 1000
-                stats_sheet.cell(row=3, column=3).value = minimum / 1000
-                stats_sheet.cell(row=3, column=4).value = maximum / 1000
-                stats_sheet.cell(row=3, column=5).value = std_dev / 1000
-                stats_sheet.cell(row=3, column=6).value = math.pow(std_dev / 1000, 2)
-                stats_sheet.cell(row=3, column=7).value = median / 1000
-                stats_sheet.cell(row=3, column=8).value = int_range / 1000
+                stats_sheet.cell(row=4, column=2).value = cp_mean
+                stats_sheet.cell(row=4, column=3).value = cp_minimum
+                stats_sheet.cell(row=4, column=4).value = cp_maximum
+                stats_sheet.cell(row=4, column=5).value = cp_std_dev
+                stats_sheet.cell(row=4, column=6).value = cp_variance
+                stats_sheet.cell(row=4, column=7).value = cp_median
+                stats_sheet.cell(row=4, column=8).value = cp_int_range
+                stats_sheet.cell(row=4, column=9).value = cp_std_error
+
+                stats_sheet.cell(row=5, column=2).value = cp_mean / 1000
+                stats_sheet.cell(row=5, column=3).value = cp_minimum / 1000
+                stats_sheet.cell(row=5, column=4).value = cp_maximum / 1000
+                stats_sheet.cell(row=5, column=5).value = cp_std_dev / 1000
+                stats_sheet.cell(row=5, column=6).value = math.pow(cp_std_dev / 1000, 2)
+                stats_sheet.cell(row=5, column=7).value = cp_median / 1000
+                stats_sheet.cell(row=5, column=8).value = cp_int_range / 1000
                 try:
-                    stats_sheet.cell(row=3, column=9).value = (std_dev / 1000) / math.sqrt(compression_count)
+                    stats_sheet.cell(row=5, column=9).value = (cp_std_dev / 1000) / math.sqrt(compression_count)
                 except ZeroDivisionError:
-                    stats_sheet.cell(row=3, column=9).value = 0
-                stats_sheet.cell(row=3, column=10).value = case
+                    stats_sheet.cell(row=5, column=9).value = 0
 
-                stats_sheet.cell(row=5, column=2).value = raw_compression_count
+                stats_sheet.cell(row=8, column=2).value = pause_mean
+                stats_sheet.cell(row=8, column=3).value = pause_minimum
+                stats_sheet.cell(row=8, column=4).value = pause_maximum
+                stats_sheet.cell(row=8, column=5).value = pause_std_dev
+                stats_sheet.cell(row=8, column=6).value = pause_variance
+                stats_sheet.cell(row=8, column=7).value = pause_median
+                stats_sheet.cell(row=8, column=8).value = pause_int_range
+                stats_sheet.cell(row=8, column=9).value = pause_std_error
 
-                stats_sheet.cell(row=8, column=2).value = compression_count
+                stats_sheet.cell(row=9, column=2).value = pause_mean / 1000
+                stats_sheet.cell(row=9, column=3).value = pause_minimum / 1000
+                stats_sheet.cell(row=9, column=4).value = pause_maximum / 1000
+                stats_sheet.cell(row=9, column=5).value = pause_std_dev / 1000
+                stats_sheet.cell(row=9, column=6).value = math.pow(pause_std_dev / 1000, 2)
+                stats_sheet.cell(row=9, column=7).value = pause_median / 1000
+                stats_sheet.cell(row=9, column=8).value = pause_int_range / 1000
+                try:
+                    stats_sheet.cell(row=9, column=9).value = (pause_std_dev / 1000) / math.sqrt(pause_count)
+                except ZeroDivisionError:
+                    stats_sheet.cell(row=9, column=9).value = 0
 
-                stats_sheet.cell(row=11, column=2).value = pause_count
+                stats_sheet.cell(row=11, column=2).value = raw_compression_count
+
+                stats_sheet.cell(row=14, column=2).value = compression_count
+
+                stats_sheet.cell(row=17, column=2).value = pause_count
 
                 # Save New Compression Data File
                 save_path = new_compression_file_path + "\\" + case + ".xlsx"
@@ -367,30 +444,49 @@ def find_compression_pauses(path):
                 master_worksheet.cell(row=j + 2, column=2).value = raw_compression_count
                 master_worksheet.cell(row=j + 2, column=3).value = compression_count
                 master_worksheet.cell(row=j + 2, column=4).value = pause_count
-                master_worksheet.cell(row=j + 2, column=5).value = mean
-                master_worksheet.cell(row=j + 2, column=6).value = minimum
-                master_worksheet.cell(row=j + 2, column=7).value = maximum
-                master_worksheet.cell(row=j + 2, column=8).value = std_dev
-                master_worksheet.cell(row=j + 2, column=9).value = variance
-                master_worksheet.cell(row=j + 2, column=10).value = median
-                master_worksheet.cell(row=j + 2, column=11).value = int_range
-                master_worksheet.cell(row=j + 2, column=12).value = std_error
+                master_worksheet.cell(row=j + 2, column=5).value = cp_mean
+                master_worksheet.cell(row=j + 2, column=6).value = cp_minimum
+                master_worksheet.cell(row=j + 2, column=7).value = cp_maximum
+                master_worksheet.cell(row=j + 2, column=8).value = cp_std_dev
+                master_worksheet.cell(row=j + 2, column=9).value = cp_variance
+                master_worksheet.cell(row=j + 2, column=10).value = cp_median
+                master_worksheet.cell(row=j + 2, column=11).value = cp_int_range
+                master_worksheet.cell(row=j + 2, column=12).value = cp_std_error
+                master_worksheet.cell(row=j + 2, column=13).value = pause_mean
+                master_worksheet.cell(row=j + 2, column=14).value = pause_minimum
+                master_worksheet.cell(row=j + 2, column=15).value = pause_maximum
+                master_worksheet.cell(row=j + 2, column=16).value = pause_std_dev
+                master_worksheet.cell(row=j + 2, column=17).value = pause_variance
+                master_worksheet.cell(row=j + 2, column=18).value = pause_median
+                master_worksheet.cell(row=j + 2, column=19).value = pause_int_range
+                master_worksheet.cell(row=j + 2, column=20).value = pause_std_error
 
                 seconds_sheet.cell(row=j + 2, column=1).value = case
                 seconds_sheet.cell(row=j + 2, column=2).value = raw_compression_count
                 seconds_sheet.cell(row=j + 2, column=3).value = compression_count
                 seconds_sheet.cell(row=j + 2, column=4).value = pause_count
-                seconds_sheet.cell(row=j + 2, column=5).value = mean / 1000
-                seconds_sheet.cell(row=j + 2, column=6).value = minimum / 1000
-                seconds_sheet.cell(row=j + 2, column=7).value = maximum / 1000
-                seconds_sheet.cell(row=j + 2, column=8).value = std_dev / 1000
-                seconds_sheet.cell(row=j + 2, column=9).value = math.pow(std_dev / 1000, 2)
-                seconds_sheet.cell(row=j + 2, column=10).value = median / 1000
-                seconds_sheet.cell(row=j + 2, column=11).value = int_range / 1000
+                seconds_sheet.cell(row=j + 2, column=5).value = cp_mean / 1000
+                seconds_sheet.cell(row=j + 2, column=6).value = cp_minimum / 1000
+                seconds_sheet.cell(row=j + 2, column=7).value = cp_maximum / 1000
+                seconds_sheet.cell(row=j + 2, column=8).value = cp_std_dev / 1000
+                seconds_sheet.cell(row=j + 2, column=9).value = math.pow(cp_std_dev / 1000, 2)
+                seconds_sheet.cell(row=j + 2, column=10).value = cp_median / 1000
+                seconds_sheet.cell(row=j + 2, column=11).value = cp_int_range / 1000
                 try:
-                    seconds_sheet.cell(row=j + 2, column=12).value = (std_dev / 1000) / math.sqrt(compression_count)
+                    seconds_sheet.cell(row=j + 2, column=12).value = (cp_std_dev / 1000) / math.sqrt(compression_count)
                 except ZeroDivisionError:
                     seconds_sheet.cell(row=j + 2, column=12).value = 0
+                seconds_sheet.cell(row=j + 2, column=13).value = pause_mean / 1000
+                seconds_sheet.cell(row=j + 2, column=14).value = pause_minimum / 1000
+                seconds_sheet.cell(row=j + 2, column=15).value = pause_maximum / 1000
+                seconds_sheet.cell(row=j + 2, column=16).value = pause_std_dev / 1000
+                seconds_sheet.cell(row=j + 2, column=17).value = math.pow(pause_std_dev / 1000, 2)
+                seconds_sheet.cell(row=j + 2, column=18).value = pause_median / 1000
+                seconds_sheet.cell(row=j + 2, column=19).value = pause_int_range / 1000
+                try:
+                    seconds_sheet.cell(row=j + 2, column=20).value = (pause_std_dev / 1000) / math.sqrt(pause_count)
+                except ZeroDivisionError:
+                    seconds_sheet.cell(row=j + 2, column=20).value = 0
 
         # Add missing files to the appropriate lists
         else:
@@ -446,6 +542,30 @@ def remove_extra_characters(file_name, file_type):
                 return file_name.replace(file_name[len(file_name) - 4: len(file_name)], "")
             else:
                 return file_name.replace(file_name[len(file_name) - 5: len(file_name)], "")
+
+
+# Calculate Mean Value
+def get_mean_value(data):
+    try:
+        return float(sum(data) / len(data))
+    except ZeroDivisionError:
+        return 0
+
+
+# Calculate Minimum Value
+def get_minimum_value(data):
+    try:
+        return data[0]
+    except IndexError:
+        return 0
+
+
+# Calculate Maximum Value
+def get_maximum_value(data):
+    try:
+        return data[len(data) - 1]
+    except IndexError:
+        return 0
 
 
 # Calculate Median Values

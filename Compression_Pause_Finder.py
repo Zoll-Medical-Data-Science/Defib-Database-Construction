@@ -79,6 +79,7 @@ def find_compression_pauses(path):
     grey_color = PatternFill(start_color='999999', end_color='999999', fill_type='solid')
     yellow_color = PatternFill(start_color='FFFF33', end_color='FFFF33', fill_type='solid')
     orange_color = PatternFill(start_color='FFBF00', end_color='FFBF00', fill_type='solid')
+    dark_orange_color = PatternFill(start_color='FF7A10', end_color='FF7A10', fill_type='solid')
     dark_green_color = PatternFill(start_color='005500', end_color='005500', fill_type='solid')
 
     # Fill list variables with Case ID numbers to later match up
@@ -217,11 +218,11 @@ def find_compression_pauses(path):
                                 pause = "TRUE"
                                 if comp_in_cpr == "FALSE":
                                     for q in range(10, 15):
-                                        compression_worksheet[get_column_letter(q) + str(k)].fill = orange_color
+                                        compression_worksheet[get_column_letter(q) + str(k)].fill = dark_orange_color
                                 else:
                                     for q in range(1, 15):
                                         if q != 9:
-                                            compression_worksheet[get_column_letter(q) + str(k)].fill = yellow_color
+                                            compression_worksheet[get_column_letter(q) + str(k)].fill = orange_color
                             else:
                                 pause = "FALSE"
                             compression_worksheet.cell(row=k, column=13).value = pause
@@ -249,7 +250,7 @@ def find_compression_pauses(path):
                                     else:
                                         for q in range(1, 15):
                                             if q != 9:
-                                                compression_worksheet[get_column_letter(q) + str(k)].fill = yellow_color
+                                                compression_worksheet[get_column_letter(q) + str(k)].fill = orange_color
                         except ValueError:
                             pass
 
